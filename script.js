@@ -128,7 +128,7 @@ function init() {
                         id,
                         start: start.trim(),
                         end: end.trim(),
-                        text: text.trim()
+                        text: text.trim().replace(/<[^>]*>/g, '')
                     });
                 }
             }
