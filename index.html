@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRT to EDL Converter for DaVinci Resolve</title>
+    <meta name="description" content="Convert SRT subtitles to DaVinci Resolve EDL markers locally in your browser.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Social Meta Tags -->
+    <meta property="og:title" content="SRT to EDL Converter for DaVinci Resolve">
+    <meta property="og:description"
+        content="Convert SRT subtitles to DaVinci Resolve EDL markers locally in your browser.">
+    <meta property="og:image" content="social_preview.png">
+    <meta property="og:url" content="https://srt2edl.com">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="social_preview.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>SRT to EDL Converter</h1>
+            <p>Convert your subtitle files to DaVinci Resolve markers instantly.</p>
+        </header>
+
+        <main>
+            <section class="upload-section" id="drop-zone">
+                <div class="upload-content">
+                    <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Drag & drop your .srt file here</p>
+                    <p class="sub-text">or</p>
+                    <label for="file-input" class="button primary" id="upload-btn">Choose File</label>
+                    <input type="file" id="file-input" accept=".srt" class="visually-hidden">
+                </div>
+            </section>
+
+            <section class="options-section">
+                <h2>Options</h2>
+                <div class="option-group">
+                    <label for="fps-select">Frame Rate (FPS)</label>
+                    <select id="fps-select">
+                        <option value="23.976">23.976</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="29.97">29.97</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                        <option value="59.94">59.94</option>
+                        <option value="60">60</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="marker-color">Marker Color</label>
+                    <select id="marker-color">
+                        <option value="Blue">Blue</option>
+                        <option value="Cyan">Cyan</option>
+                        <option value="Green">Green</option>
+                        <option value="Yellow">Yellow</option>
+                        <option value="Red">Red</option>
+                        <option value="Pink">Pink</option>
+                        <option value="Purple">Purple</option>
+                        <option value="Fuchsia">Fuchsia</option>
+                        <option value="Rose">Rose</option>
+                        <option value="Lavender">Lavender</option>
+                        <option value="Sky">Sky</option>
+                        <option value="Mint">Mint</option>
+                        <option value="Lemon">Lemon</option>
+                        <option value="Sand">Sand</option>
+                        <option value="Cocoa">Cocoa</option>
+                        <option value="Cream">Cream</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="start-timecode">Start Timecode</label>
+                    <input type="text" id="start-timecode" value="00:00:00:00" placeholder="HH:MM:SS:FF">
+                </div>
+            </section>
+
+            <section class="preview-section hidden" id="preview-section">
+                <div class="section-header">
+                    <h2>Preview</h2>
+                    <button id="download-btn" class="button success">Download EDL</button>
+                </div>
+                <pre id="edl-preview"></pre>
+            </section>
+
+            <section class="instructions-section">
+                <h3>How to use</h3>
+                <ol>
+                    <li>Upload your <strong>.srt</strong> subtitle file.</li>
+                    <li>Select the correct <strong>Frame Rate</strong> of your project.</li>
+                    <li>Choose a <strong>Marker Color</strong> for DaVinci Resolve.</li>
+                    <li>Click <strong>Download EDL</strong>.</li>
+                    <li>In DaVinci Resolve, right-click on your timeline in the Media Pool > Timelines > Import >
+                        Timeline Markers from EDL.</li>
+                </ol>
+            </section>
+        </main>
+
+        <footer>
+            <p>Runs locally in your browser. No data is sent to any server.</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
