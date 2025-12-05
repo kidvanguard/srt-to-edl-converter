@@ -86,6 +86,16 @@ function init() {
     markerColorSelect.addEventListener('change', updatePreview);
     startTimecodeInput.addEventListener('change', updatePreview);
 
+    startTimecodeInput.addEventListener('blur', () => {
+        const val = startTimecodeInput.value;
+        if (!val) return;
+
+        const fps = parseFloat(fpsSelect.value);
+        const frames = parseTimecode(val, fps);
+        startTimecodeInput.value = framesToTimecode(frames, fps);
+        updatePreview(); // Ensure preview is updated with formatted value
+    });
+
     downloadBtn.addEventListener('click', downloadEDL);
 
     function handleFile(file) {
@@ -163,11 +173,29 @@ function init() {
     }
 
     function parseTimecode(timecode, fps) {
+        // Handle simple integer input as hours (e.g. "1" -> 01:00:00:00)
+        if (/^\d+$/.test(timecode.trim())) {
+            const h = parseInt(timecode.trim(), 10);
+            return Math.round(h * 3600 * fps);
+        }
+
         const parts = timecode.split(/[:;]/).map(Number);
-        if (parts.length !== 4) return 0;
-        const [h, m, s, f] = parts;
-        const totalSeconds = h * 3600 + m * 60 + s;
-        return Math.round(totalSeconds * fps) + f;
+
+        if (parts.length === 3) {
+            // HH:MM:SS -> assume frames 0
+            const [h, m, s] = parts;
+            const totalSeconds = h * 3600 + m * 60 + s;
+            return Math.round(totalSeconds * fps);
+        }
+
+        if (parts.length === 4) {
+            // HH:MM:SS:FF
+            const [h, m, s, f] = parts;
+            const totalSeconds = h * 3600 + m * 60 + s;
+            return Math.round(totalSeconds * fps) + f;
+        }
+
+        return 0;
     }
 
     function generateEDL(subtitles, options) {
