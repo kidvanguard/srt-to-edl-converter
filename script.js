@@ -14,8 +14,18 @@ function init() {
     // Clear cache/state on load
     fileInput.value = '';
     startTimecodeInput.value = '01:00:00;00';
+    const uploadedFileSection = document.getElementById('file-uploaded-section');
+    const uploadedFilename = document.getElementById('uploaded-filename');
+    const clearBtn = document.getElementById('clear-btn');
+    const updateBtn = document.getElementById('update-btn');
+
+    // Clear cache/state on load
+    fileInput.value = '';
+    startTimecodeInput.value = '01:00:00;00';
     edlPreview.textContent = '';
     previewSection.classList.add('hidden');
+    uploadedFileSection.classList.add('hidden');
+    dropZone.classList.remove('hidden');
 
     let currentFile = null;
     let currentSRTContent = '';
@@ -86,6 +96,30 @@ function init() {
     markerColorSelect.addEventListener('change', updatePreview);
     startTimecodeInput.addEventListener('change', updatePreview);
 
+    // Explicit update button
+    if (updateBtn) {
+        updateBtn.addEventListener('click', () => {
+            console.log('Manual update requested');
+            updatePreview();
+        });
+    }
+
+    // Clear button
+    if (clearBtn) {
+        clearBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Clear requested');
+            currentFile = null;
+            currentSRTContent = '';
+            fileInput.value = '';
+            edlPreview.textContent = '';
+
+            previewSection.classList.add('hidden');
+            uploadedFileSection.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+        });
+    }
+
     startTimecodeInput.addEventListener('blur', () => {
         const val = startTimecodeInput.value;
         if (!val) return;
@@ -108,6 +142,12 @@ function init() {
             }
 
             currentFile = file;
+
+            // UI Updates
+            dropZone.classList.add('hidden');
+            uploadedFileSection.classList.remove('hidden');
+            uploadedFilename.textContent = file.name;
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 console.log('File read successfully');
@@ -173,6 +213,8 @@ function init() {
     }
 
     function parseTimecode(timecode, fps) {
+        console.log(`Parsing timecode: "${timecode}" (Type: ${typeof timecode}) at ${fps} FPS`);
+
         // Handle simple integer input as hours (e.g. "1" -> 01:00:00:00)
         if (/^\d+$/.test(timecode.trim())) {
             const h = parseInt(timecode.trim(), 10);
@@ -195,13 +237,19 @@ function init() {
             return Math.round(totalSeconds * fps) + f;
         }
 
+        console.warn('Invalid timecode format, returning 0');
         return 0;
     }
 
     function generateEDL(subtitles, options) {
+        console.log('Generating EDL with options:', options);
         const { fps, markerColor, startTimecode } = options;
         const title = currentFile ? currentFile.name.replace(/\.srt$/i, '') : 'Untitled';
-        const startOffsetFrames = parseTimecode(startTimecode || '01:00:00;00', fps);
+
+        // Ensure startTimecode is a string
+        const safeStartTimecode = String(startTimecode || '01:00:00;00');
+        const startOffsetFrames = parseTimecode(safeStartTimecode, fps);
+        console.log(`Start Offset Frames: ${startOffsetFrames} (${framesToTimecode(startOffsetFrames, fps)})`);
 
         let edl = `TITLE: ${title}\nFCM: NON-DROP FRAME\n\n`;
 
