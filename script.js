@@ -11,6 +11,12 @@ function init() {
     const markerColorSelect = document.getElementById('marker-color');
     const startTimecodeInput = document.getElementById('start-timecode');
 
+    // Clear cache/state on load
+    fileInput.value = '';
+    startTimecodeInput.value = '01:00:00;00';
+    edlPreview.textContent = '';
+    previewSection.classList.add('hidden');
+
     let currentFile = null;
     let currentSRTContent = '';
 
@@ -156,31 +162,33 @@ function init() {
         return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(f)}`;
     }
 
-    // Helper to convert SRT time (HH:MM:SS,mmm) to EDL timecode (HH:MM:SS:FF)
-    function srtTimeToEdlTime(srtTime, fps) {
-        const [timePart, msPart] = srtTime.split(',');
-        const [h, m, s] = timePart.split(':').map(Number);
-        const ms = parseInt(msPart, 10);
-
-        // Calculate frames from milliseconds
-        // Frame duration in ms = 1000 / fps
-        const frameDuration = 1000 / fps;
-        const frames = Math.floor(ms / frameDuration);
-
-        const pad = (n) => n.toString().padStart(2, '0');
-        return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(frames)}`;
+    function parseTimecode(timecode, fps) {
+        const parts = timecode.split(/[:;]/).map(Number);
+        if (parts.length !== 4) return 0;
+        const [h, m, s, f] = parts;
+        const totalSeconds = h * 3600 + m * 60 + s;
+        return Math.round(totalSeconds * fps) + f;
     }
 
     function generateEDL(subtitles, options) {
         const { fps, markerColor, startTimecode } = options;
         const title = currentFile ? currentFile.name.replace(/\.srt$/i, '') : 'Untitled';
+        const startOffsetFrames = parseTimecode(startTimecode || '01:00:00;00', fps);
 
         let edl = `TITLE: ${title}\nFCM: NON-DROP FRAME\n\n`;
 
         subtitles.forEach((sub, index) => {
             const eventNum = (index + 1).toString().padStart(3, '0');
-            const startTime = srtTimeToEdlTime(sub.start, fps);
-            const endTime = srtTimeToEdlTime(sub.end, fps);
+
+            // Convert SRT times to frames and add offset
+            const subStartFrames = timeToFrames(sub.start, fps);
+            const subEndFrames = timeToFrames(sub.end, fps);
+
+            const finalStartFrames = Math.round(startOffsetFrames + subStartFrames);
+            const finalEndFrames = Math.round(startOffsetFrames + subEndFrames);
+
+            const startTime = framesToTimecode(finalStartFrames, fps);
+            const endTime = framesToTimecode(finalEndFrames, fps);
 
             // Clean up text (remove newlines for the marker name)
             const cleanText = sub.text.replace(/\n/g, ' ');
